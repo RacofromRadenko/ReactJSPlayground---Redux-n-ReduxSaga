@@ -1,0 +1,32 @@
+.Header {
+	display: flex;
+	justify-content: flex-end;
+	flex-direction: row;
+	background-color: #fff;
+	margin: 20px auto;
+	background-color: rgb(0, 153, 255);
+	border-radius: 5px;
+	a {
+		text-decoration: none;
+		margin: auto;
+		width: 25%;
+		font-size: 16pt;
+		text-align: center;
+		color: #fff;
+
+		&:hover,
+		:focus {
+			background-color: #fff;
+			color: rgb(0, 153, 255);
+		}
+	}
+}
+
+
+@media screen and (max-width: 600px) {
+	.Header {
+	 a{
+		 font-size: 10pt;
+	 }
+	}
+}
