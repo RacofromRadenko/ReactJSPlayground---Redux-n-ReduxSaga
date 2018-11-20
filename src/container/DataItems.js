@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 import Item from '../components/Item';
 import './DataItems.less';
 import axios from 'axios';
+import { connect } from 'react-redux';
+
+import * as actionTypes from '../store/action';
 
 class DataItems extends Component {
 	state = {
@@ -17,6 +20,10 @@ class DataItems extends Component {
 
 	componentDidMount() {
 		this.pullData();
+	}
+
+	componentDidUpdate() {
+		console.log('[FETCH WITH REDUX SAGA AND REDUX]', this.props.data);
 	}
 
 	handleMinPriceEvent = (event) => {
@@ -218,6 +225,7 @@ class DataItems extends Component {
 					<button className="btn btn-primary" onClick={this.ascendingSort}>
 						Ascending Sort
 					</button>
+					<button onClick={() => this.props.onRequestData()}>Fetch data with saga i redux</button>
 
 					{/* <button onClick={this.pullDataWithPriceRange}>Price Filter</button> */}
 				</div>
@@ -261,4 +269,18 @@ class DataItems extends Component {
 	}
 }
 
-export default DataItems;
+const mapStateToProps = (state) => {
+	return {
+		fetching: state.fetching,
+		data: state.data,
+		error: state.error
+	};
+};
+
+const mapDispatchToProps = (dispatch) => {
+	return {
+		onRequestData: () => dispatch({ type: actionTypes.GET_ALL_PRODUCTS_MAKE_API_REQUEST }, console.log('clicked'))
+	};
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(DataItems);
