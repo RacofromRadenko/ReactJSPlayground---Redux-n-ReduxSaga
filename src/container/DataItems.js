@@ -3,6 +3,9 @@ import Item from '../components/Item';
 import './DataItems.less';
 import axios from 'axios';
 import { connect } from 'react-redux';
+import { store } from '../index';
+
+import { GET_PRICE_RANGE } from '../store/action';
 
 import * as actionTypes from '../store/action';
 
@@ -20,36 +23,56 @@ class DataItems extends Component {
 
 	componentDidMount() {
 		this.pullData();
+		this.props.onRequestData();
 	}
 
 	componentDidUpdate() {
-		console.log('[FETCH WITH REDUX SAGA AND REDUX]', this.props.data);
+		console.log('[FETCH WITH REDUX SAGA AND REDUX DATA]', this.props.data);
+		console.log('[FETCH WITH REDUX SAGA AND REDUX FETCHING]', this.props.fetching);
+		console.log('[FETCH WITH REDUX SAGA AND REDUX TOTAL]', this.props.total);
+		console.log('[FETCH WITH REDUX SAGA AND REDUX PAGE]', this.props.page);
+		console.log('[FETCH WITH REDUX SAGA AND REDUX PAGES]', this.props.pages);
+		console.log('[FETCH WITH REDUX SAGA AND REDUX CURRENCY]', this.props.currency);
+		console.log('[FETCH WITH REDUX SAGA AND REDUX MIN PRICE]', this.props.minPrice);
+		console.log('[FETCH WITH REDUX SAGA AND REDUX MAX PRICE]', this.props.maxPrice);
+		console.log('[FETCH WITH REDUX SAGA AND REDUX Eror]', this.props.error);
 	}
 
 	handleMinPriceEvent = (event) => {
 		// console.log(event.target.value);
+		// this.props.minPrice = event.target.value;
 
-		this.setState(
-			{
-				minPrice: event.target.value
-			},
-			() => {
-				this.pullData();
-			}
-		);
+		// console.log(this.props.minPrice);
+
+		// this.setState(
+		// 	{
+		// 		minPrice: event.target.value
+		// 	},
+		// 	() => {
+		// 		this.pullData();
+		// 	}
+		// );
+
+		return event.target.value;
 	};
 
 	handleMaxPriceEvent = (event) => {
 		// console.log(event.target.value);
+		// this.props.maxPrice = event.target.value;
 
-		this.setState(
-			{
-				maxPrice: event.target.value
-			},
-			() => {
-				this.pullData();
-			}
-		);
+		// console.log(this.props.maxPrice);
+		// this.setState(
+		// 	{
+		// 		maxPrice: event.target.value
+		// 	},
+		// 	() => {
+		// 		this.pullData();
+		// 	}
+		// );
+		const value = event.target.value;
+
+		store.dispatch(GET_PRICE_RANGE(10, 20));
+		console.log(value);
 	};
 
 	pullData() {
@@ -96,13 +119,13 @@ class DataItems extends Component {
 	}
 
 	pageUp = () => {
-		if (parseInt(this.state.total) - parseInt(this.state.page) * 20 >= 0) {
+		if (parseInt(this.props.total) - parseInt(this.props.page) * 20 >= 0) {
 			this.setState(
 				{
 					page: this.state.page + 1
 				},
 				() => {
-					this.pullData();
+					this.props.onRequestData();
 				}
 			);
 		}
@@ -115,7 +138,7 @@ class DataItems extends Component {
 					page: this.state.page - 1
 				},
 				() => {
-					this.pullData();
+					this.props.onRequestData();
 				}
 			);
 		}
@@ -128,7 +151,7 @@ class DataItems extends Component {
 				page: parseInt(ev.target.getAttribute('data-page'))
 			},
 			() => {
-				this.pullData();
+				this.onRequestData();
 			}
 		);
 	};
@@ -190,29 +213,31 @@ class DataItems extends Component {
 	};
 
 	render() {
-		const item = this.state.data.map((item) => {
-			return (
-				<Item
-					name={item.name}
-					key={item.id}
-					thumbnail={item.thumbnail}
-					image={item.smallImage}
-					moreInfo={this.moreInformation}
-					add={this.addToAccount}
-					data={item}
-					price={item.minPrice}
-					currency={this.state.currency}
-				/>
-			);
-		});
+		const item = this.props.fetching
+			? this.props.data.map((item) => {
+					return (
+						<Item
+							name={item.name}
+							key={item.id}
+							thumbnail={item.thumbnail}
+							image={item.smallImage}
+							moreInfo={this.moreInformation}
+							add={this.addToAccount}
+							data={item}
+							price={item.minPrice}
+							currency={this.state.currency}
+						/>
+					);
+				})
+			: null;
 
 		return (
-			<div className="DataItems">
+			<div className="DataItems" style={this.props.fetching ? { display: 'flex' } : { display: 'none' }}>
 				<div className="PriceRangeArea">
 					<button className="btn btn-primary" onClick={this.descendingSort}>
 						Descending Sort
 					</button>
-					<label>
+					{/* <label>
 						From:
 						<input type="text" onChange={this.handleMinPriceEvent} />
 						<p>{this.state.currency}</p>
@@ -221,11 +246,22 @@ class DataItems extends Component {
 						To:
 						<input type="text" onChange={this.handleMaxPriceEvent} />
 						<p>{this.state.currency}</p>
+					</label> */}
+
+					<label>
+						From:
+						<input type="text" value={this.props.minPrice} onChange={this.minPriceHandler} />
+						<p>{this.props.currency}</p>
+					</label>
+					<label>
+						To:
+						<input type="text" value={this.props.maxPrice} onChange={this.maxPriceHandler} />
+						<p>{this.props.currency}</p>
 					</label>
 					<button className="btn btn-primary" onClick={this.ascendingSort}>
 						Ascending Sort
 					</button>
-					<button onClick={() => this.props.onRequestData()}>Fetch data with saga i redux</button>
+					{/* <button onClick={() => this.props.onRequestData()}>Fetch data with saga i redux</button> */}
 
 					{/* <button onClick={this.pullDataWithPriceRange}>Price Filter</button> */}
 				</div>
@@ -271,15 +307,29 @@ class DataItems extends Component {
 
 const mapStateToProps = (state) => {
 	return {
-		fetching: state.fetching,
 		data: state.data,
-		error: state.error
+		fetching: state.fetching,
+		total: state.total,
+		page: state.page,
+		pages: state.pages,
+		currency: state.currency,
+		error: state.error,
+		minPrice: state.minPrice,
+		maxPrice: state.maxPrice
 	};
 };
 
 const mapDispatchToProps = (dispatch) => {
 	return {
-		onRequestData: () => dispatch({ type: actionTypes.GET_ALL_PRODUCTS_MAKE_API_REQUEST }, console.log('clicked'))
+		onRequestData: () => dispatch({ type: actionTypes.GET_ALL_PRODUCTS_MAKE_API_REQUEST }),
+		// getPriceRange: (minPrice, maxPrice) =>
+		// 	dispatch({
+		// 		type: actionTypes.GET_PRICE_RANGE,
+		// 		minPrice,
+		// 		maxPrice
+		// 	})
+		minPriceHandler: (minPrice) => dispatch(actionTypes.minPrice(minPrice)),
+		maxPriceHandler: (maxPrice) => dispatch(actionTypes.maxPrice(maxPrice))
 	};
 };
 

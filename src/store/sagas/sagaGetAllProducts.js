@@ -3,11 +3,10 @@ import axios from 'axios';
 import * as actionTypes from '../action';
 
 export function* watcherSaga() {
-	yield takeLatest(actionTypes.GET_ALL_PRODUCTS_MAKE_API_REQUEST, workerSaga);
-	console.log(yield takeLatest(actionTypes.GET_ALL_PRODUCTS_MAKE_API_REQUEST, workerSaga));
+	yield takeLatest(actionTypes.GET_ALL_PRODUCTS_MAKE_API_REQUEST, workerSaga, getPriceRange);
 }
 
-function fetchAllProducts() {
+function fetchAllProducts(minFrom = 0, minTo = 100) {
 	return axios({
 		method: 'GET',
 		url: 'https://sandboxapi.g2a.com/v1/products',
@@ -18,8 +17,8 @@ function fetchAllProducts() {
 		processData: false,
 		params: {
 			page: 1,
-			minPriceFrom: 0,
-			minPriceTo: 1000
+			minPriceFrom: minFrom,
+			minPriceTo: minTo
 		}
 	});
 }
@@ -27,14 +26,22 @@ function fetchAllProducts() {
 function* workerSaga() {
 	try {
 		const response = yield call(fetchAllProducts);
+
 		const data = response.data;
+		const total = response.data.total;
+		const page = response.data.page;
 
-		yield put({ type: actionTypes.GET_ALL_PRODUCTS_REQUEST_SUCCESS, data });
-		console.log(yield put({ type: actionTypes.GET_ALL_PRODUCTS_REQUEST_SUCCESS, data }));
+		yield put({ type: actionTypes.GET_ALL_PRODUCTS_REQUEST_SUCCESS, data, total, page, fetching: true });
 	} catch (error) {
-		yield put({ type: actionTypes.GET_ALL_PRODUCTS_REQUEST_FAILURE });
+		yield put({ type: actionTypes.GET_ALL_PRODUCTS_REQUEST_FAILURE, error });
+	}
+}
 
-		console.log(yield put({ type: actionTypes.GET_ALL_PRODUCTS_REQUEST_FAILURE }));
+export function* getPriceRange() {
+	try {
+		yield put({ type: actionTypes.GET_PRICE_RANGE });
+	} catch (error) {
+		console.log(error);
 	}
 }
 

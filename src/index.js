@@ -17,7 +17,7 @@ import { combineReducers, createStore, applyMiddleware } from 'redux';
 // const rootReducers = combineReducers(dataItemsReducer);
 
 const sagaMiddleware = createSagaMiddleware();
-const store = createStore(dataItemsReducer, applyMiddleware(sagaMiddleware));
+export const store = createStore(dataItemsReducer, applyMiddleware(sagaMiddleware));
 sagaMiddleware.run(rootSaga);
 
 const app = (
