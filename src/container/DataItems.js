@@ -3,9 +3,6 @@ import Item from '../components/Item';
 import './DataItems.less';
 import axios from 'axios';
 import { connect } from 'react-redux';
-import { store } from '../index';
-
-import { GET_PRICE_RANGE } from '../store/action';
 
 import * as actionTypes from '../store/action';
 
@@ -22,58 +19,26 @@ class DataItems extends Component {
 	};
 
 	componentDidMount() {
-		this.pullData();
+		// this.pullData();
 		this.props.onRequestData();
 	}
 
-	componentDidUpdate() {
-		console.log('[FETCH WITH REDUX SAGA AND REDUX DATA]', this.props.data);
-		console.log('[FETCH WITH REDUX SAGA AND REDUX FETCHING]', this.props.fetching);
-		console.log('[FETCH WITH REDUX SAGA AND REDUX TOTAL]', this.props.total);
-		console.log('[FETCH WITH REDUX SAGA AND REDUX PAGE]', this.props.page);
-		console.log('[FETCH WITH REDUX SAGA AND REDUX PAGES]', this.props.pages);
-		console.log('[FETCH WITH REDUX SAGA AND REDUX CURRENCY]', this.props.currency);
-		console.log('[FETCH WITH REDUX SAGA AND REDUX MIN PRICE]', this.props.minPrice);
-		console.log('[FETCH WITH REDUX SAGA AND REDUX MAX PRICE]', this.props.maxPrice);
-		console.log('[FETCH WITH REDUX SAGA AND REDUX Eror]', this.props.error);
+	componentWillUpdate() {
+		console.log('[FETCH WITH REDUX SAGA AND REDUX MAX SORTED DATA]', this.props.sortedData);
 	}
 
-	handleMinPriceEvent = (event) => {
-		// console.log(event.target.value);
-		// this.props.minPrice = event.target.value;
-
-		// console.log(this.props.minPrice);
-
-		// this.setState(
-		// 	{
-		// 		minPrice: event.target.value
-		// 	},
-		// 	() => {
-		// 		this.pullData();
-		// 	}
-		// );
-
-		return event.target.value;
-	};
-
-	handleMaxPriceEvent = (event) => {
-		// console.log(event.target.value);
-		// this.props.maxPrice = event.target.value;
-
-		// console.log(this.props.maxPrice);
-		// this.setState(
-		// 	{
-		// 		maxPrice: event.target.value
-		// 	},
-		// 	() => {
-		// 		this.pullData();
-		// 	}
-		// );
-		const value = event.target.value;
-
-		store.dispatch(GET_PRICE_RANGE(10, 20));
-		console.log(value);
-	};
+	componentDidUpdate() {
+		// console.log('[FETCH WITH REDUX SAGA AND REDUX DATA]', this.props.data);
+		// console.log('[FETCH WITH REDUX SAGA AND REDUX FETCHING]', this.props.fetching);
+		// console.log('[FETCH WITH REDUX SAGA AND REDUX TOTAL]', this.props.total);
+		// console.log('[FETCH WITH REDUX SAGA AND REDUX PAGE]', this.props.page);
+		// console.log('[FETCH WITH REDUX SAGA AND REDUX PAGES]', this.props.pages);
+		// console.log('[FETCH WITH REDUX SAGA AND REDUX CURRENCY]', this.props.currency);
+		console.log('[FETCH WITH REDUX SAGA AND REDUX MIN PRICE]', this.props.minPrice);
+		console.log('[FETCH WITH REDUX SAGA AND REDUX MAX PRICE]', this.props.maxPrice);
+		console.log('[FETCH WITH REDUX SAGA AND REDUX MAX SORTED DATA]', this.props.sortedData);
+		// console.log('[FETCH WITH REDUX SAGA AND REDUX Eror]', this.props.error);
+	}
 
 	pullData() {
 		const config = {
@@ -151,7 +116,7 @@ class DataItems extends Component {
 				page: parseInt(ev.target.getAttribute('data-page'))
 			},
 			() => {
-				this.onRequestData();
+				this.props.onRequestData();
 			}
 		);
 	};
@@ -193,24 +158,24 @@ class DataItems extends Component {
 			});
 	};
 
-	ascendingSort = () => {
-		// console.log('prvi', this.state.data);
+	// ascendingSort = () => {
+	// 	// console.log('prvi', this.state.data);
 
-		this.setState({
-			data: this.state.data.sort((a, b) => {
-				return b.minPrice - a.minPrice;
-			})
-		});
-		// console.log('drugi', this.state.data);
-	};
+	// 	this.setState({
+	// 		data: this.state.data.sort((a, b) => {
+	// 			return b.minPrice - a.minPrice;
+	// 		})
+	// 	});
+	// 	// console.log('drugi', this.state.data);
+	// };
 
-	descendingSort = () => {
-		this.setState({
-			data: this.state.data.sort((a, b) => {
-				return a.minPrice - b.minPrice;
-			})
-		});
-	};
+	// descendingSort = () => {
+	// 	this.setState({
+	// 		data: this.state.data.sort((a, b) => {
+	// 			return a.minPrice - b.minPrice;
+	// 		})
+	// 	});
+	// };
 
 	render() {
 		const item = this.props.fetching
@@ -234,7 +199,13 @@ class DataItems extends Component {
 		return (
 			<div className="DataItems" style={this.props.fetching ? { display: 'flex' } : { display: 'none' }}>
 				<div className="PriceRangeArea">
-					<button className="btn btn-primary" onClick={this.descendingSort}>
+					{/* <button className="btn btn-primary" onClick={this.descendingSort}>
+						Descending Sort
+					</button> */}
+					<button
+						className="btn btn-primary"
+						onClick={() => this.props.descendingSortHandler(this.props.data)}
+					>
 						Descending Sort
 					</button>
 					{/* <label>
@@ -250,15 +221,21 @@ class DataItems extends Component {
 
 					<label>
 						From:
-						<input type="text" value={this.props.minPrice} onChange={this.minPriceHandler} />
+						<input type="text" onChange={(e) => this.props.minPriceHandler(parseInt(e.target.value))} />
 						<p>{this.props.currency}</p>
 					</label>
 					<label>
 						To:
-						<input type="text" value={this.props.maxPrice} onChange={this.maxPriceHandler} />
+						<input type="text" onChange={(e) => this.props.maxPriceHandler(parseInt(e.target.value))} />
 						<p>{this.props.currency}</p>
 					</label>
-					<button className="btn btn-primary" onClick={this.ascendingSort}>
+					{/* <button className="btn btn-primary" onClick={this.ascendingSort}>
+						Ascending Sort
+					</button> */}
+					<button
+						className="btn btn-primary"
+						onClick={() => this.props.ascendingSortHandler(this.props.data)}
+					>
 						Ascending Sort
 					</button>
 					{/* <button onClick={() => this.props.onRequestData()}>Fetch data with saga i redux</button> */}
@@ -266,14 +243,14 @@ class DataItems extends Component {
 					{/* <button onClick={this.pullDataWithPriceRange}>Price Filter</button> */}
 				</div>
 				{item}
-				<div className="bottom-area">
+				{/* <div className="bottom-area">
 					<button
 						className={this.state.page === 1 ? 'btn btn-info disabled' : 'btn btn-info'}
 						onClick={() => this.pageDown()}
 					>
 						Previous
 					</button>
-					{this.state.pages.map((key) => {
+					{this.props.pages.map((key) => {
 						return (
 							<button
 								className={this.state.page === key ? 'btn btn-info disabled' : 'btn btn-info'}
@@ -299,37 +276,37 @@ class DataItems extends Component {
 					>
 						Next
 					</button>
-				</div>
+				</div> */}
 			</div>
 		);
 	}
 }
 
 const mapStateToProps = (state) => {
+	// const { dataItems, getPriceRange, sortingData } = this.props;
+
 	return {
-		data: state.data,
-		fetching: state.fetching,
-		total: state.total,
-		page: state.page,
-		pages: state.pages,
-		currency: state.currency,
-		error: state.error,
-		minPrice: state.minPrice,
-		maxPrice: state.maxPrice
+		data: state.dataItems.data,
+		fetching: state.dataItems.fetching,
+		total: state.dataItems.total,
+		page: state.dataItems.page,
+		pages: state.dataItems.pages,
+		currency: state.dataItems.currency,
+		error: state.dataItems.error,
+		minPrice: state.getPriceRange.minPrice,
+		maxPrice: state.getPriceRange.maxPrice,
+		sortedData: state.sortingData.data
 	};
 };
 
 const mapDispatchToProps = (dispatch) => {
 	return {
 		onRequestData: () => dispatch({ type: actionTypes.GET_ALL_PRODUCTS_MAKE_API_REQUEST }),
-		// getPriceRange: (minPrice, maxPrice) =>
-		// 	dispatch({
-		// 		type: actionTypes.GET_PRICE_RANGE,
-		// 		minPrice,
-		// 		maxPrice
-		// 	})
 		minPriceHandler: (minPrice) => dispatch(actionTypes.minPrice(minPrice)),
-		maxPriceHandler: (maxPrice) => dispatch(actionTypes.maxPrice(maxPrice))
+		maxPriceHandler: (maxPrice) => dispatch(actionTypes.maxPrice(maxPrice)),
+		ascendingSortHandler: (data) => dispatch({ type: actionTypes.ASCENDING_SORT, data: data }),
+		descendingSortHandler: (data) => dispatch({ type: actionTypes.DESCENDING_SORT, data: data })
+		// changePageHandler: () => dispatch({type: actionTypes.CHANGE_PAGE,  })
 	};
 };
 

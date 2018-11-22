@@ -8,17 +8,25 @@ import * as serviceWorker from './serviceWorker';
 
 import { Provider } from 'react-redux';
 import { dataItemsReducer } from './store/reducers/dataitems';
+import { getPriceRangeReducer } from './store/reducers/dataitems';
+import { sortingReducer } from './store/reducers/dataitems';
 import { rootSaga } from './store/sagas/sagaGetAllProducts';
 import createSagaMiddleware from 'redux-saga';
 import { combineReducers, createStore, applyMiddleware } from 'redux';
 
 //TODO (need to setup correctly)
 
-// const rootReducers = combineReducers(dataItemsReducer);
+const rootReducers = combineReducers({
+	dataItems: dataItemsReducer,
+	getPriceRange: getPriceRangeReducer,
+	sortingData: sortingReducer
+});
 
 const sagaMiddleware = createSagaMiddleware();
-export const store = createStore(dataItemsReducer, applyMiddleware(sagaMiddleware));
+export const store = createStore(rootReducers, applyMiddleware(sagaMiddleware));
 sagaMiddleware.run(rootSaga);
+
+console.log(store.getState());
 
 const app = (
 	<Provider store={store}>

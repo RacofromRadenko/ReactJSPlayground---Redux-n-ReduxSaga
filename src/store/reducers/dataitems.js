@@ -44,38 +44,51 @@ export function dataItemsReducer(state = initialState, action) {
 	}
 }
 
-// export function getPriceRangeReducer(state = initialState, action) {
-// 	console.log('111111', action);
-
-// 	switch (action.type) {
-// 		case actionTypes.GET_PRICE_RANGE:
-// 			console.log('REDUCER PRICE RANGE', action);
-// 			return {
-// 				...state
-// 				// minPrice: action.minPrice,
-// 				// maxPrice: action.maxPrice
-// 			};
-
-// 		default:
-// 			break;
-// 	}
-// }
-
-export function getMinPriceReducer(state = initialState.minPrice, action) {
+export function getPriceRangeReducer(state = initialState, action) {
 	switch (action.type) {
 		case 'GET_MIN_PRICE':
-			console.log('USAO U SRANJE JEBENO GET MIN PRICE');
 			return {
+				...state,
 				minPrice: action.minPrice
 			};
 		case 'GET_MAX_PRICE':
-			console.log('USAO U SRANJE JEBENO GET MAN PRICE');
-
 			return {
-				minPrice: action.maxPrice
+				...state,
+				maxPrice: action.maxPrice
 			};
 
 		default:
 			return state;
 	}
+}
+
+export function sortingReducer(state = initialState, action) {
+	switch (action.type) {
+		case actionTypes.ASCENDING_SORT:
+			console.log('[ACTION]', action.data);
+			console.log('[STATE]', state.data);
+
+			return {
+				...state,
+				data: action.data.sort((a, b) => {
+					return b.minPrice - a.minPrice;
+				})
+			};
+
+		case actionTypes.DESCENDING_SORT:
+			console.log('[ACTION]', action.data);
+			console.log('[STATE]', state.data);
+
+			return {
+				...state,
+				data: action.data.sort((a, b) => {
+					return a.minPrice - b.minPrice;
+				})
+			};
+
+		default:
+			break;
+	}
+
+	return state;
 }
