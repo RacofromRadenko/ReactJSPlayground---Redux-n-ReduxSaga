@@ -47,14 +47,18 @@ export function dataItemsReducer(state = initialState, action) {
 export function getPriceRangeReducer(state = initialState, action) {
 	switch (action.type) {
 		case 'GET_MIN_PRICE':
+			console.log(state);
+			console.log(action);
 			return {
 				...state,
-				minPrice: action.minPrice
+				minPrice: action.minimumPrice
 			};
 		case 'GET_MAX_PRICE':
+			console.log(state);
+			console.log(action);
 			return {
 				...state,
-				maxPrice: action.maxPrice
+				maxPrice: action.maximumPrice
 			};
 
 		default:
@@ -62,33 +66,38 @@ export function getPriceRangeReducer(state = initialState, action) {
 	}
 }
 
-export function sortingReducer(state = initialState, action) {
-	switch (action.type) {
-		case actionTypes.ASCENDING_SORT:
-			console.log('[ACTION]', action.data);
-			console.log('[STATE]', state.data);
+// TODO SORTING REDUCER
+
+// PAGE UP AND PAGE DOWN MECHANISM
+
+export function pageUpAndDownReducer(state = initialState, action) {
+	switch (action) {
+		case 'PAGE_UP':
+			console.log('usao');
+			if (parseInt(state.total) - parseInt(state.page) * 20 >= 0) {
+				state.page += 1;
+				this.dataItemsReducer();
+			}
 
 			return {
 				...state,
-				data: action.data.sort((a, b) => {
-					return b.minPrice - a.minPrice;
-				})
+				page: state.page
 			};
 
-		case actionTypes.DESCENDING_SORT:
-			console.log('[ACTION]', action.data);
-			console.log('[STATE]', state.data);
+		case 'PAGE_DOWN':
+			console.log('usao');
+
+			if (parseInt(state.page) >= 1) {
+				state.page -= 1;
+				this.dataItemsReducer();
+			}
 
 			return {
 				...state,
-				data: action.data.sort((a, b) => {
-					return a.minPrice - b.minPrice;
-				})
+				page: state.page
 			};
 
 		default:
-			break;
+			return state;
 	}
-
-	return state;
 }

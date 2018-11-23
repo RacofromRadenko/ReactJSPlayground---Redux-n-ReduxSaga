@@ -3,6 +3,7 @@ import Item from '../components/Item';
 import './DataItems.less';
 import axios from 'axios';
 import { connect } from 'react-redux';
+import { pageDown, pageUp } from '../store/action';
 
 import * as actionTypes from '../store/action';
 
@@ -21,14 +22,16 @@ class DataItems extends Component {
 	componentDidMount() {
 		// this.pullData();
 		this.props.onRequestData();
+		console.log(this.props.pageUpnDown);
 	}
 
 	componentWillUpdate() {
 		console.log('[FETCH WITH REDUX SAGA AND REDUX MAX SORTED DATA]', this.props.sortedData);
+		console.log('[FETCH WITH REDUX SAGA AND REDUX DATA]', this.props.data);
 	}
 
 	componentDidUpdate() {
-		// console.log('[FETCH WITH REDUX SAGA AND REDUX DATA]', this.props.data);
+		console.log('[FETCH WITH REDUX SAGA AND REDUX DATA]', this.props.data);
 		// console.log('[FETCH WITH REDUX SAGA AND REDUX FETCHING]', this.props.fetching);
 		// console.log('[FETCH WITH REDUX SAGA AND REDUX TOTAL]', this.props.total);
 		// console.log('[FETCH WITH REDUX SAGA AND REDUX PAGE]', this.props.page);
@@ -36,7 +39,8 @@ class DataItems extends Component {
 		// console.log('[FETCH WITH REDUX SAGA AND REDUX CURRENCY]', this.props.currency);
 		console.log('[FETCH WITH REDUX SAGA AND REDUX MIN PRICE]', this.props.minPrice);
 		console.log('[FETCH WITH REDUX SAGA AND REDUX MAX PRICE]', this.props.maxPrice);
-		console.log('[FETCH WITH REDUX SAGA AND REDUX MAX SORTED DATA]', this.props.sortedData);
+		console.log('[FETCH WITH REDUX SAGA AND REDUX MAX SORTED DATA]', this.props.ascendingSortData);
+		console.log('[FETCH WITH REDUX SAGA AND REDUX MAX SORTED DATA]', this.props.descendingSortData);
 		// console.log('[FETCH WITH REDUX SAGA AND REDUX Eror]', this.props.error);
 	}
 
@@ -83,31 +87,45 @@ class DataItems extends Component {
 			});
 	}
 
-	pageUp = () => {
-		if (parseInt(this.props.total) - parseInt(this.props.page) * 20 >= 0) {
-			this.setState(
-				{
-					page: this.state.page + 1
-				},
-				() => {
-					this.props.onRequestData();
-				}
-			);
-		}
-	};
+	// pageUp() {
+	// 	this.props.onRequestData();
+	// }
 
-	pageDown = () => {
-		if (parseInt(this.state.page) > 1) {
-			this.setState(
-				{
-					page: this.state.page - 1
-				},
-				() => {
-					this.props.onRequestData();
-				}
-			);
-		}
-	};
+	// pageDown() {
+	// 	this.props.onRequestData();
+	// }
+
+	// pageUpHandler = () => {
+	// 	// if (parseInt(this.props.total) - parseInt(this.props.page) * 20 >= 0) {
+	// 	// 	this.setState(
+	// 	// 		{
+	// 	// 			page: this.state.page + 1
+	// 	// 		},
+	// 	// 		() => {
+	// 	// 			this.props.onRequestData();
+	// 	// 		}
+	// 	// 	);
+	// 	// }
+	// 	console.log('pageUpHandler');
+
+	// 	this.props.onRequestData();
+	// };
+
+	// pageDownHandler = () => {
+	// 	// if (parseInt(this.state.page) > 1) {
+	// 	// 	this.setState(
+	// 	// 		{
+	// 	// 			page: this.state.page - 1
+	// 	// 		},
+	// 	// 		() => {
+	// 	// 			this.props.onRequestData();
+	// 	// 		}
+	// 	// 	);
+	// 	// }
+	// 	console.log('pagDownHandler');
+
+	// 	this.props.onRequestData();
+	// };
 
 	changePage = (ev) => {
 		console.log(ev.target.getAttribute('data-page'));
@@ -196,6 +214,12 @@ class DataItems extends Component {
 				})
 			: null;
 
+		console.log(this.props.page);
+		let pagesLength = this.props.pages;
+		if (pagesLength !== undefined && pagesLength !== null) {
+			pagesLength = Object.keys(pagesLength)[Object.keys(pagesLength).length - 1];
+		}
+
 		return (
 			<div className="DataItems" style={this.props.fetching ? { display: 'flex' } : { display: 'none' }}>
 				<div className="PriceRangeArea">
@@ -277,6 +301,35 @@ class DataItems extends Component {
 						Next
 					</button>
 				</div> */}
+
+				<div className="bottom-area">
+					<button
+						className={this.props.page === 1 ? 'btn btn-info disabled' : 'btn btn-info'}
+						onClick={() => this.props.pageDownHandler()}
+					>
+						Previous
+					</button>
+					{/* {this.props.pages.map((key) => {
+						return (
+							<button
+								className={this.state.page === key ? 'btn btn-info disabled' : 'btn btn-info'}
+								key={key}
+								data-page={key}
+								onClick={(ev) => {
+									this.changePage(ev);
+								}}
+							>
+								{key}
+							</button>
+						);
+					})} */}
+					<button
+						className={this.props.page === { pagesLength } ? 'btn btn-info disabled' : 'btn btn-info'}
+						onClick={() => this.props.pageUpHandler()}
+					>
+						Next
+					</button>
+				</div>
 			</div>
 		);
 	}
@@ -295,7 +348,9 @@ const mapStateToProps = (state) => {
 		error: state.dataItems.error,
 		minPrice: state.getPriceRange.minPrice,
 		maxPrice: state.getPriceRange.maxPrice,
-		sortedData: state.sortingData.data
+		pageUpnDown: state.pageUpnDown
+		// ascendingSortData: state.ascendingSortData.data,
+		// descendingSortData: state.descendingSortData.data
 	};
 };
 
@@ -304,8 +359,13 @@ const mapDispatchToProps = (dispatch) => {
 		onRequestData: () => dispatch({ type: actionTypes.GET_ALL_PRODUCTS_MAKE_API_REQUEST }),
 		minPriceHandler: (minPrice) => dispatch(actionTypes.minPrice(minPrice)),
 		maxPriceHandler: (maxPrice) => dispatch(actionTypes.maxPrice(maxPrice)),
-		ascendingSortHandler: (data) => dispatch({ type: actionTypes.ASCENDING_SORT, data: data }),
-		descendingSortHandler: (data) => dispatch({ type: actionTypes.DESCENDING_SORT, data: data })
+		// ascendingSortHandler: (data) => dispatch({ type: actionTypes.ASCENDING_SORT, data: data }),
+		// descendingSortHandler: (data) => dispatch({ type: actionTypes.DESCENDING_SORT, data: data })
+		// ascendingSortHandler: (data) => dispatch(actionTypes.ascendingDataSort(data)),
+		// descendingSortHandler: (data) => dispatch(actionTypes.descendingDataSort(data)),
+		pageUpHandler: () => dispatch(actionTypes.pageUp()),
+		pageDownHandler: () => dispatch(actionTypes.pageDown())
+
 		// changePageHandler: () => dispatch({type: actionTypes.CHANGE_PAGE,  })
 	};
 };

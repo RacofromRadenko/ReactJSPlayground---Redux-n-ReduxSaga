@@ -7,9 +7,11 @@ import { BrowserRouter } from 'react-router-dom';
 import * as serviceWorker from './serviceWorker';
 
 import { Provider } from 'react-redux';
-import { dataItemsReducer } from './store/reducers/dataitems';
-import { getPriceRangeReducer } from './store/reducers/dataitems';
-import { sortingReducer } from './store/reducers/dataitems';
+import { dataItemsReducer } from './store/reducers/dataItemsReducer';
+import { getPriceRangeReducer } from './store/reducers/dataItemsReducer';
+import { ascendingSortingReducer } from './store/reducers/dataItemsReducer';
+import { descendingSortingReducer } from './store/reducers/dataItemsReducer';
+import { pageUpAndDownReducer } from './store/reducers/dataItemsReducer';
 import { rootSaga } from './store/sagas/sagaGetAllProducts';
 import createSagaMiddleware from 'redux-saga';
 import { combineReducers, createStore, applyMiddleware } from 'redux';
@@ -19,7 +21,9 @@ import { combineReducers, createStore, applyMiddleware } from 'redux';
 const rootReducers = combineReducers({
 	dataItems: dataItemsReducer,
 	getPriceRange: getPriceRangeReducer,
-	sortingData: sortingReducer
+	pageUpnDown: pageUpAndDownReducer
+	// ascendingSortData: ascendingSortingReducer,
+	// descendingSortData: descendingSortingReducer
 });
 
 const sagaMiddleware = createSagaMiddleware();
